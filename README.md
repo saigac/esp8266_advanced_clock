@@ -29,10 +29,10 @@
 ## Установка
 
 Первичную установку необходимо провести через ArduinoIDE, указав в настройках некоторые особенности для возможности OTA-обновления прошивки:
-![esp8266_setup](https://raw.githubusercontent.com/saigac/esp8266_advanced_clock/master/img/esp8266_setup.png)
+![esp8266_setup](https://raw.githubusercontent.com/zortald/esp8266_advanced_clock/master/img/esp8266_setup.png)
 
 Обновление прошивки можно производить без участия ПК (вместо 192.168.1.7 укажите адрес esp8266 в своей сети:
-![esp8266_firmware_upgrade](https://raw.githubusercontent.com/saigac/esp8266_advanced_clock/master/img/esp8266_firmware_upgrade.png)
+![esp8266_firmware_upgrade](https://raw.githubusercontent.com/zortald/esp8266_advanced_clock/master/img/esp8266_firmware_upgrade.png)
 
 
 ## Настройка
