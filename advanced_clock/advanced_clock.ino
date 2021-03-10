@@ -66,61 +66,10 @@ static const char PAGE_ELEMENTS[] PROGMEM = R"(
       "pattern": "\\d*"
     },
     {
-      "name": "clock_workdays_alarm_enabled",
-      "type": "ACCheckbox",
-      "value": "check",
-      "label": "Использовать будильник по будням?",
-      "labelposition": "infront",
-      "checked": true
-    },
-    {
-      "name": "clock_workdays_alarm_time",
-      "type": "ACInput",
-      "label": "Время будильников &#040;через разделитель /&#041;",
-      "value": "07:30/07:40",
-      "placeholder": "07:30/07:40"
-    },
-    {
-      "name": "clock_restdays_alarm_enabled",
-      "type": "ACCheckbox",
-      "value": "check",
-      "label": "Использовать будильник по выходным?",
-      "labelposition": "infront",
-      "checked": false
-    },
-    {
-      "name": "clock_restdays_alarm_time",
-      "type": "ACInput",
-      "label": "Время будильников &#040;через разделитель /&#041;",
-      "value": "07:30/07:40",
-      "placeholder": "07:30/07:40"
-    },
-    {
       "name": "hr_002",
       "type": "ACElement",
       "value": "<hr style=\"height:1px;border-width:0;color:gray;background-color:#52a6ed\">",
       "posterior": "par"
-    },
-    {
-      "name": "display_setup",
-      "type": "ACText",
-      "value": "Настройки времени",
-      "style": "font-family:Arial;font-size:18px;font-weight:400;color:#191970"
-    },
-    {
-      "name": "display_backlight_schedule",
-      "type": "ACCheckbox",
-      "value": "check",
-      "label": "Включать подсветку по времени?",
-      "labelposition": "infront",
-      "checked": true
-    },
-    {
-      "name": "display_backlight_schedule_time",
-      "type": "ACInput",
-      "label": "Время работы подсветки &#040;через разделитель -&#041;",
-      "value": "07:30-00:00",
-      "placeholder": "07:30-00:00"
     },
     {
       "name": "display_active",
@@ -181,25 +130,22 @@ AutoConnectConfig config;
 AutoConnectAux  elementsAux;
 AutoConnectAux  saveAux;
 //------------------------// НАСТРОЙКИ  AUTOCONNECT //------------------------
+
 //----------------------------------- ПИНЫ -----------------------------------
 const int buttonPin = 12;
 const int vibroPin = 13;
 #define DHTPIN D5
 
 //---------------------------------// ПИНЫ //---------------------------------
+
 //-------------------- ОБЪЯВЛЕНИЕ ИСПОЛЬЗУЕМЫХ ПЕРЕМЕННЫХ --------------------
 char      owm_apikey[64];
 char      owm_city_id[32];
 char      clock_server[32];
 char      clock_offset[32];
-bool      clock_workdays_alarm_enabled;
-char      clock_workdays_alarm_time[32];
-bool      clock_restdays_alarm_enabled;
-char      clock_restdays_alarm_time[32];
-bool      display_backlight_schedule;
-char      display_backlight_schedule_time[32];
 long      display_active;
 //------------------// ОБЪЯВЛЕНИЕ ИСПОЛЬЗУЕМЫХ ПЕРЕМЕННЫХ //------------------
+
 //------------------------------ ИНИЦИАЛИЗАЦИЯ -------------------------------
 #include <DHT.h>
 #include <DHT_U.h>
@@ -226,6 +172,7 @@ GButton butt1(buttonPin);
 LCD_1602_RUS lcd(0x27, 16, 2);
 boolean   read_config_file = false;
 //----------------------------// ИНИЦИАЛИЗАЦИЯ //-----------------------------
+
 //------------------------------- СПЕКТРОМЕТР --------------------------------
 #define DRIVER_VERSION 1    // 0 - маркировка драйвера кончается на 4АТ, 1 - на 4Т
 #define AUTO_GAIN 1         // автонастройка по громкости (экспериментальная функция)
@@ -280,6 +227,7 @@ size_t utf8len(char *s)
     return len;
   }
 
+//вывод текста в центр экрана 1602
 void lcd_print_center(int line_number, String symbols, int offset_symbols) {
   
   char symbols_char[symbols.length() + 1];
@@ -293,9 +241,9 @@ void lcd_print_center(int line_number, String symbols, int offset_symbols) {
   lcd.print(symbols);
 }
 
-String httpGETRequest(const char* serverName) {
+String httpGETRequest(const char* server_Name) {
   HTTPClient http;
-  http.begin(serverName);
+  http.begin(server_Name);
   int httpResponseCode = http.GET();
   String payload = "{}"; 
   if (httpResponseCode>0) {
@@ -489,13 +437,7 @@ bool read_config() {
     JsonObject root_2  =  doc[2]; // "owm_city_id"
     JsonObject root_4  =  doc[4]; // "clock_server"
     JsonObject root_5  =  doc[5]; // "clock_offset"
-    JsonObject root_6  =  doc[6]; // "clock_workdays_alarm_enabled"
-    JsonObject root_7  =  doc[7]; // "clock_workdays_alarm_time"
-    JsonObject root_8  =  doc[8]; // "clock_restdays_alarm_enabled"
-    JsonObject root_9  =  doc[9]; // "clock_restdays_alarm_time"
-    JsonObject root_11 = doc[11]; // "display_backlight_schedule"
-    JsonObject root_12 = doc[12]; // "display_backlight_schedule_time"
-    JsonObject root_13 = doc[13]; // "display_active"
+    JsonObject root_6  =  doc[6]; // "display_active"
     const char* owm_apikey_char = root_1["value"];
     strlcpy(owm_apikey, owm_apikey_char, 64);
     const char* owm_city_id_char = root_2["value"];
@@ -504,17 +446,14 @@ bool read_config() {
     strlcpy(clock_server, clock_server_char, 32);
     const char* clock_offset_char = root_5["value"];
     strlcpy(clock_offset, clock_offset_char, 32);
-    clock_workdays_alarm_enabled = root_6["checked"];
-    const char* clock_workdays_alarm_time_char = root_7["value"];
-    strlcpy(clock_workdays_alarm_time, clock_workdays_alarm_time_char, 32);
-    clock_restdays_alarm_enabled = root_8["checked"];
-    const char* clock_restdays_alarm_time_char = root_9["value"];
-    strlcpy(clock_restdays_alarm_time, clock_restdays_alarm_time_char, 32);
-    display_backlight_schedule = root_11["checked"];
-    const char* display_backlight_schedule_time_char = root_12["value"];
-    strlcpy(display_backlight_schedule_time, display_backlight_schedule_time_char, 32);
-    display_active = root_13["selected"];
+    display_active = root_6["selected"];
     Serial.println("config read ok");
+    if (display_active == 1) {
+      time_mode();
+    }
+    if (display_active == 2) {
+      spectrum_mode();
+    }
     return true;
   }
 
@@ -539,7 +478,7 @@ void setup() {
         FlashFS.begin();
         File param = FlashFS.open(PARAM_FILE, "r");
         if (param) {
-          aux.loadElement(param, { "owm_setup", "owm_apikey", "owm_city_id", "clock_setup", "clock_server", "clock_offset", "clock_workdays_alarm_enabled", "clock_workdays_alarm_time", "clock_restdays_alarm_enabled", "clock_restdays_alarm_time", "display_setup", "display_backlight_schedule", "display_backlight_schedule_time", "display_active" } );
+          aux.loadElement(param, { "owm_setup", "owm_apikey", "owm_city_id", "clock_setup", "clock_server", "clock_offset", "display_active" } );
           param.close();
         }
         FlashFS.end();
@@ -553,7 +492,7 @@ void setup() {
     FlashFS.begin();
     File param = FlashFS.open(PARAM_FILE, "w");
     if (param) {
-      elementsAux.saveElement(param, { "owm_setup", "owm_apikey", "owm_city_id", "clock_setup", "clock_server", "clock_offset", "clock_workdays_alarm_enabled", "clock_workdays_alarm_time", "clock_restdays_alarm_enabled", "clock_restdays_alarm_time", "display_setup", "display_backlight_schedule", "display_backlight_schedule_time", "display_active" });
+      elementsAux.saveElement(param, { "owm_setup", "owm_apikey", "owm_city_id", "clock_setup", "clock_server", "clock_offset", "display_active" });
       param.close();
     }
     FlashFS.end();
@@ -580,12 +519,6 @@ void loop() {
   if (read_config_file) {
     read_config_file = false;
     read_config();
-    if (display_active == 1) {
-      time_mode();
-    }
-    if (display_active == 2) {
-      spectrum_mode();
-    }
   }
   butt1.tick();
   if (butt1.isSingle()) {
