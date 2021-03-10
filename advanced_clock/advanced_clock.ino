@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 //-------------------------- НАСТРОЙКИ  AUTOCONNECT --------------------------
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -205,6 +207,7 @@ long      display_active;
 #include <Arduino_JSON.h>
 #include "GyverButton.h"
 #define _LCD_TYPE 1
+#include <LiquidCrystal_I2C.h>
 #include <LCD_1602_RUS_ALL.h>
 #define DHTTYPE    DHT11
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -512,6 +515,7 @@ bool read_config() {
     strlcpy(display_backlight_schedule_time, display_backlight_schedule_time_char, 32);
     display_active = root_13["selected"];
     Serial.println("config read ok");
+    return true;
   }
 
 void setup() {
@@ -567,8 +571,7 @@ void setup() {
   timeClient.begin();
   lcd_print_center(0, WiFi.localIP().toString(), 0);
   lcd_print_center(1, WiFi.SSID(), 0);
-  delay(2000);
-  
+  delay(1000);
 }
 
 
@@ -632,7 +635,6 @@ void loop() {
     FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
     FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
     FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-    int total_lines = 0;
     for (int pos = 0; pos < 16; pos++) {   // для окошек дисплея с 0 по 15
       // найти максимум из пачки тонов
       if (vReal[posOffset[pos]] > maxValue) maxValue = vReal[posOffset[pos]];
