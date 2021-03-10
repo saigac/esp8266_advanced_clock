@@ -6,3 +6,4 @@ src
 test
 platformio.ini
 post_extra.py
+.gitignore
