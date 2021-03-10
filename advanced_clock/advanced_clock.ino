@@ -241,9 +241,10 @@ void lcd_print_center(int line_number, String symbols, int offset_symbols) {
   lcd.print(symbols);
 }
 
-String httpGETRequest(const char* server_Name) {
+String httpGETRequest(const char* serverName) {
+  WiFiClient client;
   HTTPClient http;
-  http.begin(server_Name);
+  http.begin(client, serverName);
   int httpResponseCode = http.GET();
   String payload = "{}"; 
   if (httpResponseCode>0) {
